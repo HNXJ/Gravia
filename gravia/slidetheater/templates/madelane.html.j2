@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ deck_title | default("Gravia Presentation") }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/{{ reveal_version }}/reveal.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #CFB87C;
+            --black: #000000;
+            --cyan: #00FFFF;
+            --grey: #E0E0E0;
+            --dark-grey: #1a1a1a;
+        }
+
+        /* Base */
+        .reveal {
+            background-color: var(--black);
+            color: var(--grey);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* Typography */
+        .reveal h1 {
+            font-size: 2.2em;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 800;
+            margin-bottom: 0.3em;
+        }
+        .reveal h2 {
+            font-size: 1.5em;
+            color: var(--gold);
+            border-bottom: 2px solid var(--gold);
+            display: inline-block;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .reveal h3 {
+            font-size: 1.2em;
+            color: var(--cyan);
+        }
+        .reveal p, .reveal li {
+            font-size: 0.8em;
+            color: var(--grey);
+            line-height: 1.5;
+            font-weight: 300;
+        }
+        .reveal strong { color: var(--gold); font-weight: 600; }
+        .reveal em { color: var(--cyan); }
+        .reveal a { color: var(--cyan); text-decoration: none; }
+        .reveal a:hover { text-decoration: underline; }
+
+        /* Utility classes */
+        .gold-text { color: var(--gold); }
+        .cyan-text { color: var(--cyan); }
+
+        /* Logo branding */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            margin-bottom: 30px;
+        }
+        .vu-logo { width: 120px; }
+        .blab-logo { width: 140px; }
+
+        /* Zoom frames */
+        .zoom-frame {
+            border: 2px solid var(--gold);
+            padding: 25px;
+            border-radius: 15px;
+            background: rgba(207, 184, 124, 0.05);
+            box-shadow: 0 0 30px rgba(207, 184, 124, 0.1);
+        }
+
+        /* Lists */
+        .reveal ul { list-style-type: none; padding-left: 0; }
+        .reveal ul li {
+            margin-bottom: 12px;
+            border-left: 3px solid var(--cyan);
+            padding-left: 15px;
+        }
+        .reveal ol li { margin-bottom: 8px; }
+
+        /* Tables */
+        .reveal table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.65em;
+        }
+        .reveal table td {
+            border: 1px solid var(--gold);
+            padding: 8px;
+        }
+        .reveal table th {
+            background: var(--gold);
+            color: var(--black);
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        /* Code blocks */
+        .reveal pre {
+            background: var(--dark-grey);
+            border: 1px solid rgba(207, 184, 124, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 0.55em;
+        }
+        .reveal code {
+            color: var(--cyan);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        /* Glossary cards */
+        .glossary-card {
+            border-left: 4px solid var(--cyan);
+            padding-left: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 0.4em;
+            color: var(--gold);
+            opacity: 0.6;
+            z-index: 100;
+        }
+
+        /* Plotly container */
+        .plotly-container {
+            width: 100%;
+            margin: 15px auto;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Fragments */
+        .reveal .fragment.highlight-cyan { color: var(--cyan); }
+        .reveal .fragment.highlight-gold { color: var(--gold); }
+
+        /* Transitions */
+        .reveal .slides section { transition: all 0.6s ease; }
+
+        /* Print overrides */
+        @media print {
+            .reveal { background: white; color: black; }
+            .reveal h1, .reveal h2, .reveal strong { color: #333; }
+            .reveal h3, .reveal em, .reveal a { color: #555; }
+            .footer { display: none; }
+        }
+    </style>
+    {% if extra_css %}
+    <style>{{ extra_css }}</style>
+    {% endif %}
+    {% if plotly_js %}
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    {% endif %}
+</head>
+<body>
+    <div class="reveal">
+        <div class="footer">{{ footer_text | default("Gravia | Research Factory") }}</div>
+        <div class="slides">
+            {% for slide in slides %}
+            <section{% if slide.center %} style="text-align: center;"{% endif %}{% if slide.auto_animate %} data-auto-animate{% endif %}{% if slide.background %} data-background="{{ slide.background }}"{% endif %}>
+                {{ slide.html }}
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/{{ reveal_version }}/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            width: 1200,
+            height: 900,
+            margin: 0.05,
+            minScale: 0.2,
+            maxScale: 2.0,
+            hash: true,
+            transition: '{{ transition | default("convex") }}',
+            center: true,
+            touch: true,
+            progress: true,
+            controls: true,
+            autoAnimateEasing: 'ease-in-out',
+            autoAnimateDuration: 1.0,
+        });
+    </script>
+    {% if extra_js %}
+    <script>{{ extra_js }}</script>
+    {% endif %}
+</body>
+</html>
