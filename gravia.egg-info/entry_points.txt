@@ -1,0 +1,2 @@
+[console_scripts]
+gravia = gravia.cli:main

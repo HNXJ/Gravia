@@ -1,0 +1,70 @@
+Metadata-Version: 2.4
+Name: gravia
+Version: 1.0.0
+Summary: Professional research factory: paper analysis, manuscript synthesis, interactive presentations.
+Author-email: Hamed Nejat <hamed.nejat@vanderbilt.edu>
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: click>=8.1
+Requires-Dist: httpx>=0.27
+Requires-Dist: jinja2>=3.1
+Requires-Dist: markdown>=3.5
+Requires-Dist: pymdown-extensions>=10.0
+Requires-Dist: PyMuPDF>=1.24
+Requires-Dist: pypandoc>=1.13
+Requires-Dist: Pillow>=10.0
+Requires-Dist: plotly>=5.18
+Requires-Dist: PyYAML>=6.0
+Requires-Dist: rich>=13.0
+Requires-Dist: tomli>=2.0; python_version < "3.11"
+Requires-Dist: mlx-lm>=0.10.0
+Requires-Dist: cryptography>=42.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23; extra == "dev"
+Provides-Extra: pdf-export
+Requires-Dist: playwright>=1.40; extra == "pdf-export"
+
+# Composer v2.0: The Multi-Tool Research Factory
+
+Composer is a unified workflow engine designed for high-fidelity scientific research, manuscript synthesis, and interactive presentations.
+
+## 🛠️ Tool Suite
+
+### 1. DeepRead (📖 Paper Analysis)
+Automated Vision-Language extraction of facts, figures, and logic from PDFs.
+- **Backend**: Utilizes the Office M3 Max (128GB) for remote inference.
+- **Usage**:
+  ```bash
+  python3 composer.py read <path_to_paper.pdf>
+  ```
+- **Output**: Structured Markdown reports in `misc/papers/markdowns/`.
+
+### 2. SlideTheater (🎬 Interactive Presentations)
+Generates "Prezi-style" zooming presentations using `Reveal.js` and `Plotly`.
+- **Theme**: Madelane Golden Dark (BastosLab standard).
+- **Usage**:
+  ```bash
+  python3 composer.py slide --theme moon
+  ```
+- **Output**: Portable HTML decks in `slidetheater/export/html/`.
+
+### 3. Writer (✍️ Manuscript Synthesis)
+Transforms research Markdowns into formal documents.
+- **Formats**: BioRxiv LaTeX and Microsoft Word (DOCX).
+- **Usage**:
+  ```bash
+  python3 composer.py write <path_to_markdown>
+  ```
+
+## 🧠 Integrated Skills
+Composer is self-documenting. Tool-specific intelligence is located in `.gemini/skills/` for autonomous guidance.
+
+## 🚀 Directory Standards
+- `src/`: Core Python engines.
+- `content/`: (Ignored) Source data and Markdowns.
+- `export/`: (Ignored) Final generated assets.
+
+---
+*Maintained by Hamed Nejat | Vanderbilt University*
