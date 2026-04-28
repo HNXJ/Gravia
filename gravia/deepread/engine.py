@@ -111,51 +111,26 @@ class DeepReadEngine:
 
     # -- VLM Inference --
 
-    async def _call_vlm(self, prompt: str, paper_text: str) -> str:
-        """Call the remote VLM with exponential backoff retry.
-
+    async def _call_vlm(self, prompt: str, paper_text: str, model: Optional[str] = None) -> str:
+        """Delegate VLM call to the Sovereign Orchestrator.
+        
         Args:
             prompt: The analysis prompt.
             paper_text: Truncated paper text content.
-
-        Returns:
-            Model response content.
-
-        Raises:
-            RuntimeError: After all retries exhausted.
+            model: Optional model override.
         """
-        payload = {
-            "model": self.rc.model,
-            "messages": [
-                {"role": "system", "content": self.dc.system_prompt},
-                {"role": "user", "content": f"{prompt}\n\nPaper Text:\n{paper_text}"},
-            ],
-            "temperature": self.dc.temperature,
-            "max_tokens": self.dc.max_tokens,
-        }
-
-        last_error = None
-        for attempt in range(1, self.dc.retries + 1):
-            try:
-                async with httpx.AsyncClient(timeout=self.rc.timeout) as client:
-                    response = await client.post(self.rc.reasoning_url, json=payload)
-                    response.raise_for_status()
-                    return response.json()["choices"][0]["message"]["content"]
-            except (httpx.HTTPError, KeyError, IndexError) as e:
-                last_error = e
-                wait = 2 ** attempt
-                logger.warning(
-                    "VLM call attempt %d/%d failed: %s. Retrying in %ds...",
-                    attempt, self.dc.retries, e, wait,
-                )
-                await asyncio.sleep(wait)
-
-        raise RuntimeError(f"VLM call failed after {self.dc.retries} attempts: {last_error}")
+        from gravia.orchestrator.manager import sov_orchestrator
+        
+        target_model = model or self.rc.model
+        payload = prompt
+        if paper_text:
+            payload += f"\n\nPaper Text:\n{paper_text}"
+        return await sov_orchestrator.delegate(payload, target_model)
 
     # -- Paper Processing --
 
     async def process_paper(self, file_path: Path) -> PaperAnalysis:
-        """Process a single PDF into a structured analysis.
+        """Process a single PDF into a structured analysis with chunked summarization.
 
         Args:
             file_path: Path to the PDF file.
@@ -173,12 +148,29 @@ class DeepReadEngine:
             analysis.full_text = self.extract_text(file_path)
             analysis.title, analysis.doi = self.extract_metadata(analysis.full_text)
 
-            # Build prompt and call VLM
-            prompt = self._build_prompt(analysis.title, analysis.doi)
-            truncated = analysis.full_text[:self.dc.max_chars]
+            # Chunking Logic: Process in blocks of ~max_chars to avoid OOM
+            chunk_size = self.dc.max_chars
+            chunks = [analysis.full_text[i:i + chunk_size] for i in range(0, len(analysis.full_text), chunk_size)]
+            
+            partial_summaries = []
+            for idx, chunk in enumerate(chunks):
+                logger.info("🧠 Analyzing Chunk %d/%d for: %s", idx + 1, len(chunks), analysis.title[:30])
+                chunk_prompt = (
+                    f"Summarize this section of the paper titled '{analysis.title}'.\n"
+                    f"Focus on: {idx+1}/{len(chunks)}\n\n"
+                    f"Content:\n{chunk}"
+                )
+                summary = await self._call_vlm(chunk_prompt, "")
+                partial_summaries.append(summary)
 
-            logger.info("🧠 Requesting analysis from %s ...", self.rc.host)
-            analysis.analysis_content = await self._call_vlm(prompt, truncated)
+            # Final Synthesis
+            logger.info("🎨 Synthesizing final report...")
+            synthesis_prompt = (
+                f"Synthesize the following partial summaries into a professional research report for '{analysis.title}'.\n"
+                f"Include Summary, Figure Breakdowns (if mentioned), and Implementation Logic.\n\n"
+                f"Summaries:\n" + "\n\n".join(partial_summaries)
+            )
+            analysis.analysis_content = await self._call_vlm(synthesis_prompt, "", model=self.rc.synthesis_model)
             analysis.success = True
             logger.info("✅ Analysis complete for: %s", analysis.title[:60])
 

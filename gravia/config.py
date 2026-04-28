@@ -24,12 +24,13 @@ _DEFAULT_CONFIG_PATH = Path.home() / ".gravia.toml"
 @dataclass
 class RemoteConfig:
     """Remote VLM backend settings (M3 Max or compatible)."""
-    host: str = "100.69.184.42"
-    reasoning_port: int = 4474
-    vision_port: int = 4476
+    host: str = "127.0.0.1"
+    reasoning_port: int = 1234
+    vision_port: int = 1234
     ssh_user: str = "HN"
     ssh_key: str = str(Path.home() / ".ssh" / "bridger_id_ed25519")
-    model: str = "default_model"
+    model: str = "gemma-4-e4b-it-mxfp8"
+    synthesis_model: str = "qwen3.5-9b-claude-4.6-highiq-instruct-heretic-uncensored-mlx-mxfp8"
     timeout: int = 600
 
     @property
@@ -44,7 +45,7 @@ class RemoteConfig:
 @dataclass
 class DeepReadConfig:
     """DeepRead engine settings."""
-    max_chars: int = 40_000
+    max_chars: int = 12_000
     temperature: float = 0.2
     max_tokens: int = 4096
     retries: int = 3
@@ -119,7 +120,7 @@ def _merge_toml(config: GraviaConfig, data: dict) -> GraviaConfig:
 
     if "remote" in data:
         r = data["remote"]
-        for key in ("host", "reasoning_port", "vision_port", "ssh_user", "ssh_key", "model", "timeout"):
+        for key in ("host", "reasoning_port", "vision_port", "ssh_user", "ssh_key", "model", "synthesis_model", "timeout"):
             if key in r:
                 setattr(config.remote, key, r[key])
 
@@ -151,6 +152,7 @@ def _apply_env_overrides(config: GraviaConfig) -> GraviaConfig:
         "GRAVIA_OUTPUT_DIR": ("output_dir", Path),
         "GRAVIA_REMOTE_HOST": ("remote.host", str),
         "GRAVIA_REMOTE_PORT": ("remote.reasoning_port", int),
+        "GRAVIA_SYNTHESIS_MODEL": ("remote.synthesis_model", str),
         "GRAVIA_VERBOSE": ("verbose", lambda x: x.lower() in ("1", "true", "yes")),
     }
     for env_key, (attr_path, cast) in env_map.items():
