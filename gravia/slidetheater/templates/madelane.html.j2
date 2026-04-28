@@ -170,9 +170,10 @@
 <body>
     <div class="reveal">
         <div class="footer">{{ footer_text | default("Gravia | Research Factory") }}</div>
+        <div class="gravia-global-footer">BASTOS LAB | VANDERBILT UNIVERSITY | 2024</div>
         <div class="slides">
             {% for slide in slides %}
-            <section{% if slide.center %} style="text-align: center;"{% endif %}{% if slide.auto_animate %} data-auto-animate{% endif %}{% if slide.background %} data-background="{{ slide.background }}"{% endif %}>
+            <section{% if slide.center %} style="text-align: center;"{% endif %}{% if slide.auto_animate %} data-auto-animate{% endif %}{% if slide.background %} data-background="{{ slide.background }}"{% endif %} data-transition="{{ transition | default('fade') }}">
                 {{ slide.html }}
             </section>
             {% endfor %}

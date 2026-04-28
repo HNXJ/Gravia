@@ -15,7 +15,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-import markdown as md_lib
+try:
+    import markdown as md_lib
+except ImportError:
+    md_lib = None
 from jinja2 import Environment, FileSystemLoader
 
 from gravia.config import GraviaConfig
@@ -241,6 +244,8 @@ class SlideTheaterEngine:
         theme: Optional[str] = None,
         footer_text: str = "Hamed Nejat | BastosLab | Vanderbilt University",
         deck_title: Optional[str] = None,
+        extra_css: str = "",
+        extra_js: str = "",
     ) -> Path:
         """Render all slides into a portable Reveal.js HTML file.
 
@@ -249,6 +254,8 @@ class SlideTheaterEngine:
             theme: Template name (default: madelane).
             footer_text: Footer text shown on all slides.
             deck_title: HTML <title> for the deck.
+            extra_css: Custom CSS to inject.
+            extra_js: Custom JS to inject.
 
         Returns:
             Path to the generated HTML file.
@@ -273,8 +280,10 @@ class SlideTheaterEngine:
             deck_title=deck_title,
             footer_text=footer_text,
             reveal_version=self.sc.reveal_version,
-            transition=self.sc.transition,
+            transition="fade",
             plotly_js=self._has_plotly,
+            extra_css=extra_css,
+            extra_js=extra_js,
         )
 
         output_path.write_text(html, encoding="utf-8")
