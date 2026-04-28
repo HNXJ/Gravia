@@ -1,7 +1,7 @@
 {
-  "current_specialist": null,
-  "loaded_models": [],
-  "council_state": "idle",
+  "current_specialist": "qwen3.5-40b-claude-4.5-opus",
+  "loaded_models": ["qwen3.5-40b-claude-4.5-opus"],
+  "council_state": "ALPHA_LOOP",
   "hardware_node": "M3-Max",
   "active_task": null,
   "vram_limit_n": 2,
