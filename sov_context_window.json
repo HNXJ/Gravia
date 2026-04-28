@@ -1,0 +1,9 @@
+{
+  "current_specialist": null,
+  "loaded_models": [],
+  "council_state": "idle",
+  "hardware_node": "M3-Max",
+  "active_task": null,
+  "vram_limit_n": 2,
+  "last_audit_timestamp": "2026-04-28T11:36:38Z"
+}
